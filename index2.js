@@ -408,13 +408,13 @@ npm install node-sass -Что бы установить
 Hello,
 
 Today:
-- I finished the frontend part (added sort and filter)
+- I studied TypeScript
 
 On Monday:
-- I will correct small mistakes on my frontend part
+- I start work )
 
-Time today: 07:21
-Total time: 40:05
+Time today: 05:52
+Total time: 37:18
 
 Have a good evening !
 Viacheslav.

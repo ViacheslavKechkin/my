@@ -16,7 +16,8 @@ class Test extends React.Component {
   render() {
     return <p> Test Component</p>
   }
-}
+  
+  
 export default Test;
 
 ФУНКЦИОНАЛЬНЫЙ КОМПОНЕНТ
@@ -436,32 +437,240 @@ const invoices = () => {
   </div>)
 }
 
+REDUX  REDUX  REDUX  REDUX  REDUX  REDUX  REDUX  REDUX  REDUX  REDUX  
+- npm i redux react-redux
+- npm install @reduxjs/toolkit
+Создаю стор (объект содержащий несколько методов(получить состояние, изменить, подписаться на изменение))
+первым параметром принимает reduser 
+const store = createStore(reduser)
+
+- для примера создал дефолтное состояние
+const dafaultState = {
+  cash: 0,
+}
+
+- reduser это функция, первым параметром принимает state, а вторым action
+- state это массив, объект или примитив в котором хранятся какие то данные
+- логика reduser зависит от того какой action был проброшен
+- для каждого action создается case
+//РЕФАКТОРИНГ
+const ADD_CASH = "ADD_CASH";
+const GET_CASH = "GET_CASH";
+
+const reduser = (state = dafaultState, action) => {
+  switch (action.type) {
+    case ADD_CASH:
+      return {...state, cash: state.cash + action.payload}
+    case GET_CASH:
+      return {...state, cash: state.cash - action.payload}
+    default:
+      return state
+  }
+}
+
+//РЕФАКТОРИНГ после просто вызываем функцию и передаем в нее данные
+export const addMeCash = (payload) => ({type: ADD_CASH, payload});
+export const getMeCash = (payload) => ({type: GET_CASH, payload});
+
+- action является JS объектом (с обязательным полем type, по этому полю мы будем определять как состояние будет изменяться)
+(в action можно передать любое количество данных через payload)
+action = {type: "", payload: ""}
+
+После действий сверху оборачиваю главный компонент в Provider и параметр он принимает store
+<Provider store={store}></Provider>
+
+- Что бы изменить состояние внутри компонента:
+const dispatch = useDispatch();
+
+- Что бы получить состояние внутри компонента:
+параметром принимает функцию, а функция уже параметром принимает состояние
+const cash = useSelector(state => state.cash);
+
+- Функции изменения сотояния:
+
+const addCash = () => {
+  //dispatch принимает параметром action с обязателым параметром type
+  //payload - данные для изменения
+  //dispatch({type: "ADD_CASH", payload: 5})
+  //РЕФАКТОРИНГ
+  dispatch(addMeCash(5))
+}
+
+//что бы сумму указывали сами
+const addCash = (cash) => {
+  //dispatch принимает параметром action с обязателым параметром type
+  //payload - данные для изменения
+  // dispatch({type: "ADD_CASH", payload: cash})
+   //РЕФАКТОРИНГ
+   dispatch(addMeCash(cash))
+}
+
+TOOLKITSLICE TOOLKITSLICE TOOLKITSLICE TOOLKITSLICE TOOLKITSLICE TOOLKITSLICE 
+- npm i redux react-redux
+- npm install @reduxjs/toolkit
+// Также оборачиваем в провайдер
+<Provider store={store}></Provider>
+// Также использую useDispatch и useSelector в компоненте где нужно работать со стэйтом
+const dispatch = useDispatch();
+const count = useSelector(state => state.toolkit.count);
+const todos = useSelector(state => state.toolkit.todos);
+//что бы использовать функции изменения:
+onClisk={() => dispatch(increment())}
+
+//в файле index.js папки store 
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import toolkitSlice from "./toolkitSlice";
+
+//создаю корневой редюсер (если несколько редюсеров нужно использовать combineReducers)
+const rootReducer = combineReducers({
+  toolkit: toolkitSlice,
+  //тут можно помещать следующий редюсер
+});
+// создаю стор
+export const store = configureStore({
+  reducer: rootReducer,
+});
+
+//в файле toolkitSlice.js папки store 
+import { createSlice } from "@reduxjs/toolkit";
+
+const toolkitSlice = createSlice({
+  name: "toolkit",
+  initialState: {
+    count: 0,
+    todos: ["1 задача", "2 задача", "3 задача"],
+    cardOnEditing: -1,
+  },
+  reducers: {
+    //создаю action
+    increment(state) {
+      state.count = state.count + 1;
+    },
+    decrement(state) {
+      state.count = state.count - 1;
+    },
+    addTodo(state, action) {
+      state.todos.push(action.payload);
+    },
+    removeLastTodo(state) {
+      state.todos.pop();
+    },
+    setCardOnEditing(state, action) {
+      state.cardOnEditing = action.payload;
+    },
+  },
+});
+//экспорт рэдюсера
+export default toolkitSlice.reducer;
+//экспорт экшэнов
+export const { increment, decrement, addTodo, removeLastTodo, setCardOnEditing } =
+  toolkitSlice.actions;
+  
+//для использования в компоненте:
+import { setCardOnEditing} from "../../store/toolkitSlice.js"; //делаю импорт action
+const dispatch = useDispatch(); // использую для того что бы пользоваться action
+dispatch(setCardOnEditing(index));
+//для использования state
+const cardOnEditing = useSelector((state) => state.toolkit.cardOnEditing);
+
+TOOLKITSLICE АССИНРОННЫЕ ЗАПРОСЫ 
+- npm i redux-thunk
+
+import { createSlise, createAsyncThunk } from "@reduxjs/toolkit";
+
+const initialState = {
+  posts: [],
+}
+//createAsyncThunk - принимает имя и функцию
+export const getPosts =  createAsyncThunk(
+  //имя формируется из имени слайса из которого буду братсья данные
+  'post/getPosts',
+  //первый аргумент это payload (если данных не будет ставим прочерк)
+  //второй это набор option-ов
+  async (_,{ rejectWhithValue, dispatch }) => {
+    const res = await axios.get("http://localhost:9000/createDish")
+    dispatch(setPosts(res.data))
+  }
+)
+
+export const deletePostsById =  createAsyncThunk(
+  'post/deletePostsById',
+  async (id,{ rejectWhithValue, dispatch }) => {
+    const res = await axios.delete(`http://localhost:9000/deleteDish?_id=${id}`)
+    dispatch(deletePost(id))
+  }
+)
+
+export const postSlice = createSlise({
+  name: 'post',
+  initialState,
+  reducers: {
+    setPosts: (state, action) = > {
+      state.posts = action.payload
+    },
+    deletePost: (state, action) => {
+      state.posts = state.posts.filter((post) => post.id !== action.payload)
+    }
+  },
+  // нужно для отслеживания событий  асинка
+  extraReducers: {
+    //могу получить с помощью - rejectWhithValue 
+    [getPosts.fulfilled]: () => console.log('fulfilled'),
+    [getPosts.pending]: () => console.log('pending'),
+    [getPosts.rejected]: () => console.log('rejected'),
+  },
+})
+
+export const { setPosts, deletePost } = postSlice.actions;
+export default postSlice.reducer;
+//После выполненого выше, можно имрортировать в нужном компоненте функцию getPosts
+import { getPosts} from "../../store/toolkitSlice.js"; 
+//и спомощью dispatch вызывать например по клику
+onClick={() => dispatch(getPosts())}
+
+
 TYPESCRIPT TYPESCRIPT TYPESCRIPT TYPESCRIPT TYPESCRIPT TYPESCRIPT 
 -npm install -g typescript (что бы установить глобально)
 //при созданиии рект приложения можно сразу задать шаблон typescript
 - npx create-react-app . --template typeacript 
 TypeScript — это язык программирования, в котором исправлены многие недостатки JavaScript.
 - npm install -g typescript - для установки
+после создания файла например app.ts что бы посмотреть его .js и как он выглядит:
 - tsc app.ts - чтобы скомпилировать файл app.ts (после создания .ts файла - создается js файл с такими же данными)
 - node app.js - что бы запустить файл
 
 ТИПЫ данных в TypeScript (всегда использовать типы в нижнем регистре !)
 - let myData: boolean = true;
-- let myData: number = 25;
+- let myData: number = 25; (можно задавать не только целые значения - 4.2 или 3е10)
 - let myData: string = `Hi ${name}`;
 
 -МАССИВ (есть два вида написания)
 let list: number[] = [1, 2, 3];
-//Жденерик <number> - указывает из чего состоит данный массив и тд
+//Дженерик <number> - указывает из чего состоит данный массив и тд
 let list1: Array<number> = [1, 2, 3];
 const list2: ReadonlyArray<number> = [1, 2, 3]; (только для чтения)
 const list: readonly number[] = [1, 2, 3]; (только для чтения)
--можно указать разные типы в массиве
+// можно указать разные типы в массиве
 let values: (string | number)[] = ['name', 45, 'name'];
--можно использовать не целочисленный индекс 
+// можно использовать не целочисленный индекс 
 в длину основного массива такие значения записывать не будут
 list[-100] = 50;
 list[10.5] = 122;
+
+ОБЪЕКТЫ
+//Можно вместо перечесления типов в {} после person: воспользоваться alias
+type PersonSettings = {name: string, age: number, country: 'Russia' | 'USA', from?: string }
+// сначала после : задаем типы данных а после уже присваиваем
+const person: {
+  name: string
+  age: number
+  country: 'Russia' | 'USA' // вводи данные которые могут быть у этого поля
+  from?: string // необязательное поле
+} = {
+  name: 'Max',
+  age: 23,
+  country: 'Russia',
+}
 
 -КОРТЕЖИ (Tuples) (позволяет выразить массив с фиксированным числом элементов 
   и типы которых известны, но не обязательно должны быть одинаковыми)
@@ -481,7 +690,7 @@ const [age, name, numbers] = myLet;
 
 - enum (для перечисления - список именованных констант)
 enum Color {
-  Red, //Red = 1 или Red = '#d2324' можно задать порядок цифр либо что то в строке
+  Red, //Red = 1 или Red = '#d2324' можно задать порядок цифр либо что-то в строке
   Green,
   Blue
 }
@@ -490,26 +699,61 @@ const myColor2 = Color[2]; //выдаст Blue
 
 - unknowm (может понадобиться для описания типа данных который мы не знаем)
  let myLet: unknowm = 5; //(тип данных можно менять по ходу myLet = 'hi')
-- any (отказать от проверки типа данных - отличие от unknown, any позволяет получить свойства к произвольным свойствам даже не существующим)
+
+- any (отказать от проверки типа данных - отличие от unknown, 
+any позволяет получить свойства к произвольным свойствам даже не существующим)
 let myLet: any = 9; //(тип данных можно менять по ходу myLet = 'hi')
-- void (отсутствие вообще какого либо типа данных -если например функция не возвращает какие либо данные то указываем ей void)
+
+- void (отсутствие вообще какого либо типа данных 
+   если например функция не возвращает какие либо данные то указываем ей void)
 const handlerClick ():void => {
   console.log('hi');
 }
-- null
-let myLet: null = null;
-- undefined
-let myLet: undefined = undefined;
+
 - never (тип значений которые никогда не встречаются, которые никогда не возвращаются)
+- использовать в двух случаях (когда функция возращает ошибку и никогда не заканчивает свое выполнение
+либо когда функция постоянно что либо делает )
 const error = (message: string):never => {
   console.log('hi');
 }
-- object (не примитивный тип!)
-//как такогого типа данных нет мы не можешь обратиться к свойствам
-// можно через api object.create (создаем и добавляем какие нужно пропсы объекту)
-let myObject: object = {}; 
 
-ИНТЕРФЕЙСЫ - это основной способ в TypeScript объединять описания 
+TYPE (похоже на интерфейсы, но у интерфейсов больше функций, например наследование)
+//создал тип ГОРОД
+type TypeCity = {
+  title: string
+  bornTear: number
+  population: number
+}
+//от типа ГОРОД создал город Нью Йорк
+const newYork: TypeCity = {
+  title: 'NewYork'
+  bornTear: 1500
+  population: 10000000
+}
+//по аналогии с чеслом, строкой и тд можно делать массив из типа который создал сам
+const cities: TypeCity[] = [newYork, Taganrog]
+//так можно делать у типов, но нельзя делать у интерфейсов
+type A = {
+  age: number;
+}
+type B ={ 
+  name: string;
+}
+type C = A | B;
+
+const obj: C = {
+  age: 22,
+  name: "SLava"
+}
+
+ПСЕВДОНИМ (alias) - что бы использовать несколько типов (создать свои собственные типы)
+type SomeName = string | number | boolean;
+let myLet: SomeName = 123;
+let myLet: SomeName = "123";
+
+
+ИНТЕРФЕЙСЫ часто называют через I (IClock) это говорит о том что это интерфейс
+- это основной способ в TypeScript объединять описания 
 нескольких типов в одно именованное описание
 Вместо создания нового interface вы можете описать все, 
 что вы хотите встроенно, используя :{ /*Structure*/ }
@@ -527,10 +771,18 @@ const Jane: User = {
   age: 33,
   city: 'city'
 }
-// можно указать к какому типу относится объект
-const myObject = {} as User;
+// интерфейс для функций
+interface SumA {
+  (a: numbrem b: number): number;
+}
+const sum: SumA = (a, b) => a + b;
 
-//наследование
+// УТВЕРЖДЕНИЕ указываем что myObject будет относится к User
+const myObject = {} as User;
+//или таже запись по старому
+//const myObject = <User>{};
+
+//наследование интерфейсов
 interface Employee extends User {
   job: srting,
   salary: number
@@ -538,16 +790,18 @@ interface Employee extends User {
   // а возращает она строку
   getName: () => string 
 }
+
 let TomSmith: Employee = {
   firstName: 'TomSmith',
   age: 23,
-  job: dfdfdf,
+  job: 'dfdfdf',
   salary: 455555
   getName(): string {
     return this.firstName
   }
 }
 // Если нужно сделать интерфейс для объекта у которого много динамических ключей
+//или например неизвество сколько придет данных
 interface Styles {
   [key: string]: string
 }
@@ -565,24 +819,78 @@ type NotNull<T> = T extends null | undefined ? never : T;
 let value: NotNull<string>;
 value = 'test'
 
-ДЖИНЕРИКИ 
-const reverse<T> = (items: T[]): T[] => {
-  const temp = []
-  for (let i = items.length - 1; i >= 0; i--) {
-    temp.push(items[i]);
+//НАСЛЕДОВАНИЕ КЛАССОВ ОТ ИНТЕРФЕЙСОВ
+interface IClock {
+  time: Date
+  setTime(date: Date): void
+}
+//что бы TypeScript понял что класс реализуется от интерфейса нужно:
+class Clock implements IClock {
+  time: Date = new Date()
+  setTime(date: Date): void {
+    this.time = date
   }
-  return temp;
 }
 
-ОБЪЕДИНЕНИЕ
+ДЖИНЕРИКИ 
+//Дженерик <number> - указывает что массив состоит из чисел
+let arrayOfNumbers: Array<number> = [1, 2, 3];
+let  arrayOfStrings: Array<string> = ['1', '2', '3'];
+//Параметр  Т  будет динамически подстраиваться под значения которые передаем (числа бувку и тд)
+const reverseFoo = //<T>(items: T[]): T[] => {                                    
+  return [...items]
+}
+//будет работать оба вызова функции так как указали - Т
+reverseFoo(arrayOfNumbers)
+reverseFoo(arrayOfStrings)
+//Дженерик в функция как аргумент, внутри <> указываем что будем передавать
+const newFunction1 = reverseFoo<number>([3, 4, 5])
+const newFunction2 = reverseFoo<string>(['3', '4', '5'])
+ 
+// ОБЪЕДИНЕНИЕ Дженериков
 const extend<T, U> = (first: T, second: U): T&U => {
   return {...first, ...second};
 }
+//Написание своего Джинерика
+interface MyArray<T> {
+  [n: number]: T;
+  //что бы воспользовать методом массива .map необходимо этот метод сначала описать
+  //что бы метод принимал как числа так и буквы нужно писать дженерик <U>
+  map<U>(fn: (el: T) => U): U[];
+}
+const tsArr: MyArray<number> = [1, 2, 3, 4]
+tsArr.map((i) => i + 1);
+tsArr.map((i) => `${i} + 1`);
+//Если нужно передать в функцию ИМЕННО массив с любыми типами
+const getLength = //<T extends Array<any>>(arr: T[]): number => {                                    
+  return arr.length;
+}
 
-ПСЕВДОНИМ - что бы использовать несколько типов 
-type SomeName = string | number | boolean;
-let myLet: SomeName = 123;
-let myLet: SomeName = "123";
+
+ОПЕРАТОРЫ вспомогательные
+//что бы например можно было менять ключи в интерфейсе
+interface Person {
+  name: string
+  age: number
+}
+type PersonKey = keyof Person // 'name' | 'age'
+
+let key: PersonKeys = 'name'
+key = 'age'
+//что бы получить тип без некоторых данных которые есть в основном
+type User = {
+  _id: number
+  name: string
+  email: string
+  createAt: Date
+}
+//с помощью ключевого слова Exclude в <> после запятой указываем исключения которые нам не нужны
+type UseNotAllKeys1 = Exclude<keyof User, '_id' | 'createAt'> //  
+//с помощью ключевого слова Pick указываем поля которые наоборот нам нужны
+type UseNotAllKeys2 = Pick<keyof User, 'name' | 'email'> // 
+
+let user1: UseNotAllKeys1 = 'name' 
+user1 = '_id' //выдаст ошибку так как мы исключили '_id' | 'createAt' из UseNotAllKeys1
 
 ФУНКЦИИ
 // если вместо : number указать : void 
@@ -599,6 +907,7 @@ const myFoo = (par1: number, par2: number): number => {
 const add = (a: number, b: number): number => {
   return a + b;
 }
+
 // ПЕРЕГРУЗКА ФУНКЦИЙ
 interface MyPosition {
   x: number | undefined
@@ -624,25 +933,10 @@ function position(a?: number, b?: number) {
   return {x: a, y: b}
 }
 
-
-TSCONFIG 
-- Команда для создания файла( tsc init ) 
-Либо создаем файл tsconfig.json в корне проекта 
-Этот файл устанавливает корневой каталог проекта, выполняет настройку параметров и устаналивает фалы проекта
-файл для настройки проекта TypeScript - tsconfig.json состоит из двух частей. 
-Какие-то опции необходимо указывать в root, а какие-то в compilerOptions
-
-.d.ts
-Описывает синтаксис и структуру функций и свойств, 
-которые могут использоваться в программе, не предоставляя при этом конкретной реализации
-Этот файл автоматически включается в контекст компиляции проекта TypeScript.
-Цель этого файла - упростить процесс написания кода JavaScript с контролем типов
-
-
 CLASS 
 у классов есть 3 модификатора доступа (позволяют скрыть состояние объекта от внешнего доступа)
 public - Если к свойствам и функциям классов не применяется модификатор, то такие свойства и функции расцениваются как будто они определены с модификатором public
-private - нельзя обратиться из вне (можем изменять внутри нашего класса)
+private - нельзя обратиться из вне (можем изменять внутри нашего класса в конструкторе)
 protected - из вне методы и поля видты только в классах наследниках
 
 class User {
@@ -655,8 +949,8 @@ class User {
     this.name = userName;
     this.age = userAge;
   }
-
-  print() { //метод класса
+  //метод класса
+  print() { 
     console.log(`name: ${this.name}, age: ${this.age}`);
   }
 }
@@ -672,15 +966,113 @@ class Person extends User {\
   //если в User указать protected методу или полю то при наследовании будут видты 
   //а из вне доступа не будет 
 }
-/////
-interface IClock {
-  time: Date
-  setTime(date: Date): void
+
+Абстрактные КЛАССЫ и методы 
+- они ни во что не компелитуются, нужны на этапе разработки что бы от них наследоваться
+
+abstract class Component {
+  abstract render(): void
+  abstract info(): string
 }
-//что бы TypeScript понял что класс реализуется от интерфейса нужно:
-class Clock implements IClock {
-  time: Date = new Date()
-  setTime(date: Date): void {
-    this.time = date
+
+class AppComponent extends Component {
+  render(): void {
+    console.log('render');
   }
+
+  info(): string {
+    console.log('info');
+  }
+}
+
+GUARDS позволяет работать с типами
+
+function strip(x: string | number) {
+  if (typeOf x === 'number') {
+    return x.toFixed(2)
+  }
+  return x.trim()
+}
+
+// Проверка на принадлежность к определенному классу !
+class MyResponse {
+  header = 'response header'
+  result = 'response result'
+}
+
+class MyError {
+  header = 'error header'
+  message = 'error message'
+}
+
+funcstion handle(res: MyResponse | MyError ) {
+  if (res instanceof MyResponse ) {
+    return {
+      info: res.header + res.result
+    }
+  } else {
+    return {
+      info: res.header + res.message
+    }
+  }
+}
+
+
+TSCONFIG 
+- Команда для создания файла( tsc --init ) 
+Либо создаем файл tsconfig.json в корне проекта 
+Этот файл устанавливает корневой каталог проекта, выполняет настройку параметров и устаналивает фалы проекта
+файл для настройки проекта TypeScript - tsconfig.json состоит из двух частей. 
+Какие-то опции необходимо указывать в root, а какие-то в compilerOptions
+
+.d.ts
+Описывает синтаксис и структуру функций и свойств, 
+которые могут использоваться в программе, не предоставляя при этом конкретной реализации
+Этот файл автоматически включается в контекст компиляции проекта TypeScript.
+Цель этого файла - упростить процесс написания кода JavaScript с контролем типов
+
+
+
+TYPESCRIPT И REACT        TYPESCRIPT И REACT         TYPESCRIPT И REACT
+
+- Для типизации пропсов которые передаю чилдреном 
+(закидываю данные между тэгов компонента) использовать: children: React.ReactNode}
+ //обычно пропсы описываются через интерфейс:
+interface Props {
+  children?: React.ReactNode,
+  id: number,
+  className: string
+}
+const MyComponent ({children}: Props) {
+  //что то выполняю в компоненте
+}
+//ВМЕСТО того что описано выше МОЖНО ПЕРЕДАТЬ ТИП САМОМУ КОМПОНЕНТУ
+//и тогда автоматом чилдрену добавит React.ReactNode
+//Что бы расширить функционал своими типами то их нужно передать как дженерик в .FC
+interface Props {
+  id: number,
+  className: string
+}
+const MyComponent: React.FC<Props> ({children, id, className}) {
+  //что то выполняю в компоненте
+}
+
+//ДЛЯ ТИПИЗАЦИИ INPUT 
+const CustomInput = (props: React.HTMLProps<HTMLInputElement>) => {
+  
+  //после того как описал пропсами могу передавать в этот компонент уже данные
+  const onChange: React.ChangeEventHandker<HTMLInputElement> = (e) => {
+    console.log(e.target.value);
+  }
+  const onClick: React.ReactEventHandler = (e) => {
+    console.log(e);
+  }
+
+  return (
+    <input 
+    onClick={onClick}
+    onChange={onChange}
+    className="my-input"
+    />
+  )
 }

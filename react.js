@@ -11,7 +11,7 @@ REACT
 import { yellow } from 'colorette'
 import Express from 'express'
 import { Input } from 'postcss'
-import React from 'react';
+import React, { useReducer } from 'react';
 class Test extends React.Component {
   render() {
     return <p> Test Component</p>
@@ -153,6 +153,7 @@ useEffect(() => testFunction(), []) - Если нужно запустить э�
 - Если хочу сделать shouldComponentUpdate только в функциональном компоненте
 (запрещаю перерендриваться компоненту если какие то свойства поменялись)
 export default React.memo(App, () => true);
+useReducer() - позволяет вынести логику в отдельный файл (как в редаксе)
 
 СОБЫТИЯ
 выполняем() => testButton() - если делать сразу вызов функции она будет вызываться при первом рендере, а не по нажатию
@@ -625,6 +626,7 @@ export const { setPosts, deletePost } = postSlice.actions;
 export default postSlice.reducer;
 //После выполненого выше, можно имрортировать в нужном компоненте функцию getPosts
 import { getPosts} from "../../store/toolkitSlice.js"; 
+import { string } from 'prop-types'
 //и спомощью dispatch вызывать например по клику
 onClick={() => dispatch(getPosts())}
 
@@ -956,7 +958,7 @@ class User {
 }
 //когда есть конструктор мы должны передать в класс значения (имя и возраст)
 let tom: User = new User('Tom', 45);
-//эти строки не нужны если есть конструктор
+//эти строки не нужны если нет конструктора
 let tom: User = new User();
 tom.name = 'Tom';
 tom.age = 22;
@@ -1037,14 +1039,20 @@ TYPESCRIPT И REACT        TYPESCRIPT И REACT         TYPESCRIPT И REACT
 
 - Для типизации пропсов которые передаю чилдреном 
 (закидываю данные между тэгов компонента) использовать: children: React.ReactNode}
+  ReactNode - что бы не писать проверку на кажждый отдельный тип, потому что в React чилдронами 
+могут быть и числа и строки и div и тд
  //обычно пропсы описываются через интерфейс:
 interface Props {
   children?: React.ReactNode,
   id: number,
   className: string
 }
-const MyComponent ({children}: Props) {
-  //что то выполняю в компоненте
+const MyComponent = ({children}: Props) => {
+  return (
+    <h1>
+      {children}
+    </h1>
+  )
 }
 //ВМЕСТО того что описано выше МОЖНО ПЕРЕДАТЬ ТИП САМОМУ КОМПОНЕНТУ
 //и тогда автоматом чилдрену добавит React.ReactNode
@@ -1053,16 +1061,25 @@ interface Props {
   id: number,
   className: string
 }
-const MyComponent: React.FC<Props> ({children, id, className}) {
-  //что то выполняю в компоненте
+const MyComponent: React.FC<Props> = ({children, id, className}) => {
+  return (
+    <h1>
+      {children}
+    </h1>
+  )
 }
 
-//ДЛЯ ТИПИЗАЦИИ INPUT 
+//ДЛЯ ТИПИЗАЦИИ INPUT и ДЛЯ ТИПИЗАЦИИ ХУКОВ
+// Например если пропсами через компонент хочу передать инпуту disable={true} и тд
+//после того как описал, пропсами могу передавать в этот компонент уже данные
+
 const CustomInput = (props: React.HTMLProps<HTMLInputElement>) => {
-  
-  //после того как описал пропсами могу передавать в этот компонент уже данные
-  const onChange: React.ChangeEventHandker<HTMLInputElement> = (e) => {
-    console.log(e.target.value);
+  //если задать начально значение тип будет подобран автоматически, но лучше отображать в джинериках
+  const [value, setValue] = useState<string>('');
+
+  //что бы не описывать сам ивент можно это сделать для функции
+  const onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    setValue(e.target.value)
   }
   const onClick: React.ReactEventHandler = (e) => {
     console.log(e);
@@ -1070,9 +1087,56 @@ const CustomInput = (props: React.HTMLProps<HTMLInputElement>) => {
 
   return (
     <input 
+    value={value}
     onClick={onClick}
     onChange={onChange}
     className="my-input"
+    {...props}
     />
+  )
+}
+//Тут передаю пропсы в CustomInput
+const App = () => {
+  return (
+    <div>
+      <CustomInput
+      disable={true}
+      />
+    </div>
+  )
+}
+
+// ТИПИЗАЦИИ useContext
+
+//ТИПИЗАЦИЯ - объявляю интерфейс и описываю цвет
+interfase Theme {
+  color: string;
+  background: string;
+}
+//ТИПИЗАЦИЯ - перечесление доступных тем
+type AvailableThemes = 'light' | 'dark'
+
+//создал тему и дженериком передал настройки темы и какие они могут быть
+const themes: Record<AvailableThemes, Theme> = {
+  light: {
+    color: "#00000",
+    background: "#00000"
+  },
+  dark: {
+    cilir: "#00000",
+    background: "#00000"
+  }
+};
+//ТИПИЗАЦИЯ - дженериком передаю что контекст принимает какую то тему
+const ThemeContext = createContext<Theme>(themes.dark)
+
+const Hooks = () => {
+  //вызываю контекст можно указать тут что получает тему useContext<Theme>(ThemeContext)
+  const them = useContext(ThemeContext);
+
+  return (
+    <button ctyle={{background: theme.background, color: theme.color}}>
+      button
+    </button>
   )
 }

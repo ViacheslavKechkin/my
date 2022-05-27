@@ -368,6 +368,7 @@ JOI
 
 YUP 
 Валидация для фронта (для formik)
+.matches(/^[a-zA-Zа-яА-Я]/, "There should be only letters")
 
 React-TOASTIFY
 Библиотека для снекбаров
@@ -380,6 +381,14 @@ UUID
 - импорт import { v4 } from 'uuid'; 
 - вызов где нужно сделать id - v4()
 
+INPUTMASK — это библиотека javascript, которая создает маску ввода
+- npm install inputmask --save
+import Inputmask from "inputmask.es6.js";
+<input data-inputmask="'mask': '99-9999999'" />
+Любая опция также может быть передана с использованием атрибута данных. 
+Используйте data-inputmask-< имя параметра >="значение"
+<input id="example2" data-inputmask-regex="[a-za-zA-Z0-9]" />
+
 DOTENV - для конфигов (что бы например спрятать секретные файлы)
 - npm i dotenv устанавливаем и создаем файл с конфигами (.env)
 ( в .env заносим данные которые нужно будет передавать как секретные MY_VAR='my information')
@@ -387,6 +396,11 @@ DOTENV - для конфигов (что бы например спрятать 
 лучше писать в самом верху это и не нет необходимости прописывать путь в каждом файле, 
 он и так будет доступен во всем проекте
 Что бы вытащить данные - process.env.MY_VAR
+- Что бы запустить в РЕАКТ нужно просто написать имя переменной в .env  определенным образом 
+в Реакт импортов делать не надо !
+//REACT_APP_BACKEND_URI="http://localhost:9000" 
+и дальше использовать как обычно const URI = process.env.REACT_APP_BACKEND_URI;
+
 
 NODEMON
 - npm i nodemon - нужен что бы каждый раз при изменении файлов сервер перезапускался
@@ -446,6 +460,15 @@ app.listen(4000);
 SCSS
 npm install node-sass -Что бы установить 
 
+ВАЛИДАЦИЯ RegExp
+Номер телефона 
+/^(\+7|7|8)?[\s\-]?\(?[489][0-9]{2}\)?[\s\-]?[0-9]{3}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$/
+Только буквы (и пробельные символы)
+/^[a-zA-Zа-яА-Я\s]/ 
+Две десятичные цифры
+/^(([1-9]{1}\d*)|(0{1}))(\.\d{2})$/
+\s - пробельные символы
+
 
 Hello,
 
@@ -470,9 +493,16 @@ Link :
 have a good day
 
 в регистрации
-// const pattern = /(?=.*[0-9])(?=.*[a-zA-Z])[0-9a-zA-Z]{6,}/g;
 
-    // if (!pattern.test(password)) {
+// const pattern = /(?=.*[0-9])(?=.*[a-zA-Z])[0-9a-zA-Z]{6,}/g;
+в Order
+.matches(/^[a-zA-Zа-яА-Я]/, "There should be only letters")
+.matches(/^(([1-9]{1}\d*)|(0{1}))(\.\d{2})$/, "There must be a number with two decimal places")
+
+Номер телефона 
+/^(\+7|7|8)?[\s\-]?\(?[489][0-9]{2}\)?[\s\-]?[0-9]{3}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$/;
+
+// if (!pattern.test(password)) {
     //   setMessageSnackBar("Пароль должн быть не меньше 6 символов, должен состоять из латинских символов и содержать хотя бы 1 число.!");
     //   return setMySnackBar({ open: true })
     // }
@@ -500,3 +530,42 @@ have a good day
     //   "type": "image/png",
     //   "sizes": "512x512"
     // }
+БЛЮДА В КОРЗИНЕ 
+      // const addToCart = (id, count, price) => {
+  //   dispatch(setItemsOrder([...itemsOrder, { id, count, sum: price }]));
+
+  //   console.log("itemsOrder", itemsOrder);
+
+  //   toast.success("Dish added");
+
+  //   itemsOrder.forEach((el) =>
+  //     el.id === id
+  //       ? dispatch(
+  //           setItemsOrder([{ id, count: el.count + 1, sum: el.sum + price }])
+  //         )
+  //       : dispatch(
+  //           setItemsOrder([...itemsOrder, { id, count: count, sum: price }])
+  //         )
+  //   );
+  // };
+
+  ORDER
+
+    // const [opts, setOpts] = useState({ mask: Number });
+  // const {
+  //   ref,
+  //   maskRef,
+  //   value,
+  //   setValue,
+  //   unmaskedValue,
+  //   setUnmaskedValue,
+  //   typedValue,
+  //   setTypedValue,
+  // } = useIMask(opts);
+
+  // const element = document.getElementById("phone");
+  // const maskOptions = {
+  //   mask: "+7(000)000-00-00",
+  //   lazy: false,
+  // };
+  // const mask = new IMask(element, maskOptions);

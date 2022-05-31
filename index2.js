@@ -29,6 +29,35 @@ const { NOTIMP } = require("dns")
 margin: 20px; - внешние отступы
 padding: 20px; - внутренние отступы(меняют размер блока)
 
+ПРИЖАТЬ ФУТЕР К НИЗУ  (ПРИЖАТЬ ФУТЕР К НИЗУ)  ПРИЖАТЬ ФУТЕР К НИЗУ
+<body>
+    <header>...</header>
+    <section class="main-content">...</section>
+    <footer>...</footer>
+</body>
+/////
+html{
+  height: 100%;
+}
+body{ // в React нгужно это задвать для #root 
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+//
+header{
+  /* 0 flex-grow, 0 flex-shrink, auto flex-basis */
+  flex: 0 0 auto;
+}
+.main-content{
+  /* 1 flex-grow, 0 flex-shrink, auto flex-basis */
+  flex: 1 0 auto;
+}
+footer{
+  /* 0 flex-grow, 0 flex-shrink, auto flex-basis */
+  flex: 0 0 auto;
+}
+
 
 .block1 div {
   такая запись стилей делает стили у div которые в block1
@@ -468,6 +497,27 @@ npm install node-sass -Что бы установить
 Две десятичные цифры
 /^(([1-9]{1}\d*)|(0{1}))(\.\d{2})$/
 \s - пробельные символы
+
+МАСКА для телефона (с формиком)
+import InputMask from "react-input-mask";
+
+<Field
+id="phone"
+type="text"
+name="phone"
+render={({ field }) => (
+  <InputMask
+    {...field}
+    className="form-field"
+    mask="+7 (999) 999 9999"
+    placeholder="Enter your phone number"
+    type="text"
+    onChange={(e) => {
+      setFieldValue("phone", e.target.value);
+    }}
+  />
+)}
+/>
 
 
 Hello,

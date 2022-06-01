@@ -619,3 +619,52 @@ have a good day
   //   lazy: false,
   // };
   // const mask = new IMask(element, maskOptions);
+
+  // mongoose.connect(uri).catch((err) => {
+//   err.status(503).send("Server is not available! error status: 503");
+// });
+
+module.exports.deleteOne = async (req, res) => {
+  const id = req.params.id;
+  try {
+    if (id) {
+      Dishes.deleteOne({ _id: id })
+        .then(() => {
+          res.status(200).send("Dish has been removed");
+        })
+        .catch(() => {
+          res.status(500).send("Something went wrong, please try again later!");
+        });
+    } else {
+      res.status(404).send("Dish id wasn't provided!");
+    }
+  } catch (error) {
+    res.status(500).send("Something went wrong, please try again later!");
+  }
+};
+
+module.exports.update = async (req, res) => {
+  const id = req.params.id;
+
+  const { error } = getValidationDish(req.body);
+
+  if (error) {
+    return res.status(400).send("Not all required fields have been completed!");
+  }
+
+  const body = req.body;
+
+  try {
+    if (id) {
+      Dishes.updateOne({ _id: id }, body)
+        .then(() => {
+          res.send({ data: body });
+        })
+        .catch(() => {
+          res.status(500).send("Something went wrong, please try again later!");
+        });
+    }
+  } catch (error) {
+    res.status(500).send("Something went wrong, please try again later!");
+  }
+};

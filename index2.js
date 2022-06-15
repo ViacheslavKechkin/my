@@ -116,6 +116,31 @@ div { width: 980px; }
 -Процентное соотношение блоков
 нужно контейнеру задать width: 100 %;,одному блоку например width: 20 %;, второму width: 80 %;
 
+EVENT LOOP (цикл событий) EVENT LOOP EVENT LOOP EVENT LOOP 
+это бесконечный цикл который выполняет задачи, ожидает следующие выполняет их и снова ожидет следующие
+ - Нужен что бы в JS который является однопоточным, 
+была возможность выполнять код асинхронно 
+
+console.log('statr (1)');// 1 выполнится первыйм 
+
+const btn = document.getElementById('btn'); // 2 найдется кнопка
+
+function someFunction() {
+  setTimeout(function callback() { // 5 уйдет в web API для ожидания
+    console.log('внутри таймаута (1)'); // 9 после того как пройдет время выполнется
+  }, 3000)
+  console.log('внутри someFunction (1)'); // 6 выполнится консоль
+}
+
+btn.addEventListener('click', someFunction); // 3 повесится слушатель
+ 
+someFunction() // 4 вызовется функуия  // 7 вернется результат функции
+
+console.log('end (1)'); // 8 выполнится консоль
+
+EVENT LOOP EVENT LOOP EVENT LOOP EVENT LOOP EVENT LOOP EVENT LOOP 
+
+
 ТИПЫ ДАННЫХ(8шт.):
 string, number, bigInt, boolean, null, undefined, object, symbol
 - определить тип данных переменной можно с помощью команды typeOf()
@@ -325,6 +350,7 @@ pending - ожидание
 fulfilled - решено в нашу сторону(resolve)
 rejected - ошибка при решении задачи
 
+
 const momHappy = false;
 const promise = new Promise((resolve, reject) => {
   if (momHappy) {
@@ -332,10 +358,10 @@ const promise = new Promise((resolve, reject) => {
       brand: 'Sumsung',
       color: 'red'
     }
-    resolve(phone);
+    resolve(phone);// когда все выполнилось правильно
   } else {
     const err = new Error('not phone');
-    reject(err);
+    reject(err); // когда произошла какая то ошибка
   }
 });
 const askMom = () => {
@@ -344,10 +370,20 @@ const askMom = () => {
 };
 askMom();
 
+.finally() //  метод как catch или then только он срабатывает всегда не зависимо была ли ошибка
+Promise.all(промисы) // метод который выполняется когда все переданные в него промисы выполнились
+//у него также есть метот then (в котором можем написать что то после выполнения всех переданных промисов)
+Promise.race(промисы) // метод который выполняется когда первый из переданных в него промисов выполнится
+//у него также есть метот then (в котором можем написать что то после выполнения самого первого переданного промиса)
+
 АСИНХРОННЫЕ ФУНКЦИИ 
+- как у Promise у асинхронных функций есть возможность отлавливать ошибки, 
+это делаться с помощью try и catch
+- функция которая является асинхронной всегда возвращает Promise
+
 // async - указываем что данная функция ассинхронная
 const onClickButton = async () => {
-  if (input.value != '') {
+  try { 
     // fetch - метод для работы с запросами на сервер 
     // await - ожидаем данные для отправки
     const response = await fetch('http://localhost:8000/createTask', {
@@ -368,6 +404,10 @@ const onClickButton = async () => {
     // обновляем данные имеющегося массива
     // data потому что данные хронятся в свойстве data у объекта
     allTasks = result.data;
+  } catch (e) { // в случае какой либо ошибки будет выполняться этот блок
+    console.error(e)
+  } finally {  // данный блок выполнется в любом случае 
+    console.log('hello');
   }
 }
 АСИНХРОННЫЕ ФУНКЦИИ

@@ -12,7 +12,7 @@ REACT
 
 Можно делать extends от - (PureComponent) вместо просто Component, вызывает рендер когда стейт или пропсы изменились ! ! !
 Для функциональных компонентов можно использовать memo также как PureComponent
-import React,{ Component } from 'react';
+import React,{ Component, useTransition } from 'react';
 //обязательным является метод render и расширение от React.Component
 //можно сделать импорт React, { Component } и указывать просто Component без React.Component
 class HelloClass extends Component {
@@ -149,6 +149,42 @@ const result = [
 
 memo() - вызывает рендер когда стейт или пропсы изменились
 нужно memo обернуть весь компонент так как memo компонент высшего порядка
+
+ДЛЯ ОПТИМИЗАЦИИ можно использовать 
+Позволяет лениво подгружать когда есть роутинг что то, 
+если я зашел на майн и не нажад на Deteils
+то оно и не будет загружать до момента нажатия данного компонента
+
+import { lazy, Suspense } from 'react'
+//динамический импорт компонента
+const Details = lazy(() => import('./pages/Details'))
+//в fallback можно давать любые данные, хоть отдельный компонент
+//нужен что бы пока подгружается код Deteils был какой то прилоадер
+<Suspense fallback={<h2>loading...</h2>}>
+  //мой какой то компонент
+  <Details />
+<Suspense />
+
+</>
+ТАКЖЕ используется для оптимизации хук useTransition
+import React, { useTransition } from 'react'
+useTransition={}
+//isPending - это флаг который отвечает за то подготавливается ли перерендер
+//при помощи isPending можем отображать какой нибудь спинер загрузки
+{isPending && <h1>Loading...</h1>}
+//startTransition - функция которая запускает отложенный рендер
+const [isPending, startTransition] = useTransition()
+
+const onChangeValue = (e) => {
+  //первое состояние отвечает за то что находится внутри input
+  setValue(e.target.value);
+  startTransition(() => {
+  //отвечает за фильтрацию и отложенное изменение  какого то значения
+    setFilteredValue(e.target.value)
+  })
+}
+
+
 
 import React from "react";
 const Test2 = memo(({ name }) => {

@@ -909,6 +909,28 @@ TypeScript — это язык программирования, в которо
 - tsc app.ts - чтобы скомпилировать файл app.ts (после создания .ts файла - создается js файл с такими же данными)
 - node app.js - что бы запустить файл
 
+НУЖНО добавить в корень проекта файл tsconfig.json. 
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "sourceMap": true,
+    "jsx": "react",
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "esModuleInterop": true
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
+Теперь в секцию scripts файла package.json добавим команду для компиляции:
+"tsc:w": "tsc -w"
+Создаю в src файл index.d.ts:
+declare module '*.jpg';
+declare module '*.jpeg';
+declare module '*.svg'; и т.д.
+
+
 - В JS при доступе к несуществующему свойству возвращается undefined. 
 По этой причине, при чтении опционального (?) свойства необходимо выполнять проверку на undefined ! ! !
 

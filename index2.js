@@ -245,6 +245,26 @@ function sum(a, b) {
 let curriedSum = curry(sum);
 alert( curriedSum(1)(2) ); // 3
 
+STOGAGE - данные в них хронятся как String !
+Cookie (хронятся в headers запроса)
+- document.cookie = "username=John Doe; expires=Thu, 18 Dec 2020 12:00:00 UTC";, максимум 3Kb могут быть
+- имеют срок годности и после исчезают
+- ассациируются с определным доменом
+- после создания cookie все запросы в пределах домена будут автоматически передавать эти cookie !!!
+- Для безопастности есть httpOnly(доступ и мадификация только на сервере), Secure(доступ только по htttps)
+localStorage и sessionStorage 
+- Хронятся на клиенте, максимум 5Kb могут быть
+- setItem() - записать данные
+- getItem() - прочитать данные
+localStorage
+- данные хронятся пока мы их не удалим!
+sessionStorage
+- данные удаляются после закрытия вкладки
+пример:
+localStorage.setItem("name", "Viacheslav")
+
+
+
 ТИПЫ ДАННЫХ(8шт.):
 string, number, bigInt, boolean, symbol, undefined, object, null
 - определить тип данных переменной можно с помощью команды typeOf()

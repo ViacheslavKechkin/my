@@ -18,7 +18,7 @@ REACT
 
 КЛАССОВЫЙ КОМПОНЕНТ
 
-Можно делать extends от - (PureComponent) вместо просто Component, вызывает рендер когда стейт или пропсы изменились ! ! !
+Можно делать extends от - (PureComponent) вместо просто Component, вызывает рендер когда пропсы изменились ! ! !
 Для функциональных компонентов можно использовать memo также как PureComponent
 import React,{ Component, useTransition } from 'react';
 //обязательным является метод render и расширение от React.Component
@@ -98,7 +98,6 @@ HelloClass.defaultProps = { name: "Tom1", age: 55 };
 export default HelloClass;
 
 (lifecycle) МЕТОДЫ жизненного цикла 
-
 1 - constructor(props): конструктор, в котором происходит начальная инициализация компонента
 2 - static getDerivedStateFromProps(props, state): вызывается непосредственно перед рендерингом компонента. 
 Этот метод не имеет доступа к текущему объекту компонента (то есть обратиться к объкту компоненту через this) 
@@ -190,8 +189,8 @@ class CustomTextInput extends React.Component {
 ДЛЯ ОПТИМИЗАЦИИ 
 useMemo() - будет повторно вычислять мемоизированное значение только тогда, 
 когда значение какой-либо из зависимостей изменилось.
-memo(), PureComponent - вызывает рендер когда стейт или пропсы изменились
-нужно memo обернуть весь компонент так как memo компонент высшего порядка
+memo(), PureComponent - вызывает рендер когда пропсы изменились
+нужно memo обернуть весь компонент так как memo это - HOC
 import React from "react";
 const Test2 = memo(({ name }) => {
   return (
@@ -233,9 +232,8 @@ const onChangeValue = (e) => {
     setFilteredValue(e.target.value)
   })
 }
-
-Хуки — это функции, с помощью которых вы можете «подцепиться» 
-к состоянию и методам жизненного цикла React из функциональных компонентов
+// Нужно использовать что бы ижбежать бесконечной подписки и потери памяти
+componentWillUnmount()
 
 СТИЛИ в react
 Есть 3 основных способа добавления стилей
@@ -254,11 +252,26 @@ PROPS - внешние параметры которые передаются в
 
 
 MATERIAL UI
-Что бы ее подключить:
- - npm install @mui/material @emotion/react @emotion/styled
+npm install @mui/material @emotion/react @emotion/styled
 Что бы что то использовать (например Alert) нужно импортировать API:
 - import { Alert } from '@mui/material';
 
+CHAKRA UI
+npm i @chakra-ui/react @emotion/react @emotion/styled framer-motion
+//либо срарзу создать проект с надстройками
+npx create-react-app my-app --template @chakra-ui/typescript
+
+import * as React from 'react'
+// 1. импортируем компонент `ChakraProvider`
+import { ChakraProvider } from '@chakra-ui/react'
+function App() {
+  // 2. Поместите ChakraProvider в корень вашего приложения
+  return (
+    <ChakraProvider>
+      <App />
+    </ChakraProvider>
+  )
+}
 
 УСЛОВНЫЙ РЕНДЕРИНГ
 - условный рендеринг - компоненты можно показывать или прятать в зависимости от текущего состояния
@@ -343,26 +356,41 @@ const App = () => {
   );
 }
 
-ЖИЗНЕННЫЕ ЦЫКЛЫ компонентов
-в функциональных компонентах - при помощи useEffect
-в классовых компонентах при помощи методов:
+ЖИЗНЕННЫЕ ЦЫКЛЫ 
 componentDidMount() { } - вызывается после рендеринга компонента
-shouldComponentUpdate(nextProps, nextState) - вызывается каждый раз при обновлении объекта props или state.
-componentDidUpdate(prevProps, prevState, snapshot) - вызывается сразу после обновления компонента(если shouldComponentUpdate возвращает true)
+shouldComponentUpdate(nextProps, nextState) - вызывается каждый раз при обновлении объекта props или state.(если функци возвращает true)
+componentDidUpdate(prevProps, prevState, snapshot) - вызывается сразу после обновления компонента
 componentWillUnmount() { } - вызывается перед удалением компонента из DOM
+componentDidCatch(errorString, errorInfo) - позволяет реагировать на события,
+происходящие в дочернем компоненте, а конкретно на любые неперехваченные ошибки
 
-HOOKS
-useEffect() - эта функция выполняется каждый раз при изменении состояния(что бы были актуальные данные)
+HOOKS HOOKS HOOKS HOOKS HOOKS HOOKS HOOKS HOOKS HOOKS HOOKS HOOKS HOOKS HOOKS HOOKS HOOKS HOOKS HOOKS HOOKS
+// Как componentDidMount() и componentDidUpdate()
+useEffect(() =>{}) - эта функция выполняется каждый раз при изменении состояния(что бы были актуальные данные)
+// или
+useLayoutEffect()
+
 useEffect(() => testFunction(), [props]) - Теперь подписка будет создана повторно только при изменении props
-useEffect(() => testFunction(), []) - Если нужно запустить эффект и сбросить его только один раз(при монтировании и размонтировании), нужно передать пустой массив
-- Если хочу отменить что то когда компонент отмантируется нужно:
+
+// Как componentDidMount() и componentWillUnmount()
+useEffect(() => testFunction(), []) - при монтировании и размонтировании
+
+// Как componentWillUnmount()
 useEffect(() => {
   const subscription = props.source.subscribe();
   return () => {
-    // Очистить подписку - пишу тут нужную функцию
+    // Выполнит функцию которая возвращается когда нужно будет сбросить эффект !
     subscription.unsubscribe();
   };
 });
+
+// Как shouldComponentUpdate или PureComponent
+export default React.memo(App, () => true); - запрещаю перерендриваться компоненту если какие то свойства поменялись)
+
+Хуки — это функции, с помощью которых вы можете «подцепиться» 
+к состоянию и методам жизненного цикла React из функциональных компонентов
+
+HOOKS
 useReducer() - позволяет вынести логику в отдельный файл (как в редаксе)
 useMemo() - Передайте «создающую» функцию и массив зависимостей. 
 useMemo будет повторно вычислять мемоизированное значение только тогда, 
@@ -392,9 +420,6 @@ function TextInputWithFocusButton() {
     </>
   );
 }
-- Если хочу сделать shouldComponentUpdate только в функциональном компоненте
-(запрещаю перерендриваться компоненту если какие то свойства поменялись)
-export default React.memo(App, () => true);
 
 //ЕСЛИ НУЖНО ЧТО БЫ ПРИ ПЕРЕХОДЕ НА СТРАНИЦУ ОНА ПРОКРУЧИВАЛАСЬ ВВЕРХ
 useEffect(() => {
@@ -409,6 +434,13 @@ useEffect(() => {
 const changeValue = (e) => {
   console.log(e.target.value);
 }
+
+React PORTAL
+Используется для: диалоги, всплывающие карточки и всплывающие подсказки.
+Когда нужно чтобы дочерний элемент визуально выходил за рамки своего контейнера
+ReactDom.createPortal(child, container)
+child — это любой React-компонент, который может быть отрендерен(элемент, строка или фрагмент). 
+container — это DOM-элемент.
 
 FORMS
 const App = () => {
@@ -499,8 +531,11 @@ class Footer extends Component {
 }
 
 - Context - интерфейс предоставляющий глобальную информацию о среде приложения 
-Нужен для управления состоянием - заменил Redux
 (что бы не прокидывать пропсами если нужно передать соседнему компоненту).
+
+- НУЖЕН например когда приходит много данных о пользователе и приходится 
+делать prop drilling (лучше взять контекст и выдергивать где надо данные)
+- НУЖЕН в небольших проектах так как сильную нагрузку данных не сможет выдержать
 
 - Не используйте Context, если он заменяет пробрасывание всего на один-два уровня. 
 Этот инструмент — отличный способ, если нужно распространить состояние 
@@ -902,6 +937,7 @@ REDUX SVGA
 
 TYPESCRIPT TYPESCRIPT TYPESCRIPT TYPESCRIPT TYPESCRIPT TYPESCRIPT 
 -npm install -g typescript (что бы установить глобально)
+-npm install --save-dev typescript (добавление зависимости в package.json)
 //при созданиии рект приложения можно сразу задать шаблон typescript
 - npx create-react-app . --template typeacript 
 TypeScript — это язык программирования, в котором исправлены многие недостатки JavaScript.
@@ -910,17 +946,30 @@ TypeScript — это язык программирования, в которо
 - node app.js - что бы запустить файл
 
 НУЖНО добавить в корень проекта файл tsconfig.json. 
+(он сам создается при создании проекта через команду ! ! !)
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "sourceMap": true,
-    "jsx": "react",
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "esModuleInterop": true
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react"
   },
-  "exclude": [
-    "node_modules"
+  "include": [
+    "src"
   ]
 }
 Теперь в секцию scripts файла package.json добавим команду для компиляции:
@@ -1594,3 +1643,27 @@ const Hooks = () => {
     </button>
   )
 }
+
+// ТИПИЗАЦИИ Redux
+const store = configureStore({
+  reducer: rootReducer,
+});
+
+export type RootState = ReturnType<typeof store.getState>
+
+export type AppDispatch = typeof store.dispatch
+
+export const useAppDispatch: () => AppDispatch = useDispatch
+
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector
+
+export default store
+
+// Настроить slice для posts
+- Слайс представляет собой объект с ключами detail , list , create , update 
+- Каждый из них имеет ключи: result  - результат запроса, success  - флаг успешности запроса, fetching  - флаг текущей загрузки, message  - сообщение сервера либо ошибка, и если сущность это список, то опциональный dto 
+- dto  - это Data Transfer Object, описывает параметры с которыми мы получаем данные (пагинация), имеет ключи: page - номер страницы, limit - сколько на странице, sort - имя поля по которому сортируем, order - asc/desc, все из них необязательные
+
+Тут очень будут уместно разобрать generics из Typescript - все типы по сути одинаковы, отличаются только типом ответа (они уже описаны в прошлых задачах).
+
+Начальное состояние булевых переменных - false, сообщений или единичного результат - null, результата-списка - пустой массив, для пагинации - дефолтный размер страницы и первая страница, без сортировок
